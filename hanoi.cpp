@@ -63,19 +63,6 @@ public:
     }
 };
 
-void write_hi() {
-    for (int i = 0; i < 5; i++) {
-        Termio::buffer[i][0] = '|';
-        Termio::buffer[i][5] = '|';
-        Termio::buffer[i][9] = '|';
-    }
-    Termio::buffer[3][13] = ' ';
-    Termio::buffer[1][9] = ' ';
-    for (int i = 1; i < 5; i++) {
-        Termio::buffer[2][i] = '-';
-    }
-}
-
 void write_buffer(stack<int> a , stack<int> b , stack<int> c){
     for(int i = 0 ; i < 11; ++i){
         Termio::buffer[i][5] = '|';
@@ -113,8 +100,10 @@ void write_buffer(stack<int> a , stack<int> b , stack<int> c){
 }
 
 bool pop_push(stack<int> &A , stack<int> &B){
-    if(!A.empty() && (&A != &B) && A.top() < B.top()){
+    //std::cout << A.empty() << " " << A.top() << " " << B.top() << std::endl ;
+    if((B.empty() & !A.empty()) || (!A.empty() && (&A != &B) && A.top() < B.top())){
         B.push(A.pop()) ;
+        //std::cout << "B = "<<B.top() << std::endl ;
         return true ;
     }
     else return false ;
@@ -134,12 +123,9 @@ struct movePair{
 };
 
 stack<int>& match(int n , stack<int> &A, stack<int> &B, stack<int> &C){
-    switch (n) {
-        case 1 : return A ; break ;
-        case 2 : return B ; break ;
-        case 3 : return C ;
-    }
-
+    if(n == 1) return A ;
+    else if(n == 2) return B ;
+    else return C ;
 }
 
 stack<int>& match2(int n , stack<int> &A, stack<int> &B, stack<int> &C){
@@ -223,11 +209,13 @@ void run(){
                 std::string f , t ;
                 char from , to ;
                 bool flag ;
-                cin >> f >> t ;
-                if(f.length() != 1 || t.length() != 1) continue;
+                cin >> f ;
+                if(f.length() != 1) continue;
                 from = f[0] ;
-                to = t[0] ;
                 if(from == 'Q') break ;
+                cin >> t ;
+                if(t.length() != 1) continue ;
+                to = t[0] ;
                 if(from == '0' && to == '0'){
                     autoPlayMode(num , A , B , C , memoryStack) ;
                 }
@@ -235,13 +223,16 @@ void run(){
                     Termio::Draw();
                 }
                 else{
+                    //std::cout << from - '0' << " " << to - '0'  << std::endl ;
                     flag = pop_push(match(from - '0' , A , B , C), match(to - '0' , A , B ,C)) ;
+                    //std :: cout << flag << std :: endl ;
                     if(flag){
                         movePair p(to - '0' , from - '0') ;
-                        memoryStack.push(p) ;                     
+                        memoryStack.push(p) ;
                     }
                     Termio::ResetBuffer() ;
                     write_buffer(A , B , C) ;
+                    //std::cout << A.size() << " " << B.size() << std::endl ;
                     Termio::Draw();
                 }
                 if(B.size() == num){
